@@ -1,0 +1,44 @@
+name:                WangsAlgorithm
+version:             0.1.0.0
+synopsis:            A Propositional Theorem Prover using Wang's Algorithm
+-- description:
+homepage:            http://github.com/joom/WangsAlgorithm
+license:             MIT
+license-file:        LICENSE
+author:              Joomy Korkut
+maintainer:          cumhurkorkut@gmail.com
+-- copyright:
+category:            Math
+build-type:          Simple
+-- extra-source-files:
+cabal-version:       >=1.10
+
+executable wang
+  main-is:             Main.hs
+  build-depends:       base >=4.7 && <4.8
+                     , parsec >= 3
+                     , WangsAlgorithm
+  hs-source-dirs:      execs
+  default-language:    Haskell2010
+
+library
+  default-extensions:  OverloadedStrings
+  exposed-modules:     WangsAlgorithm.Proposition
+                     , WangsAlgorithm.Prover
+                     , WangsAlgorithm.Parser
+  build-depends:       base
+                     , parsec >= 3
+  hs-source-dirs:      src
+  default-language:    Haskell2010
+  ghc-options: -Wall -threaded
+
+test-suite tests
+  type: exitcode-stdio-1.0
+  hs-source-dirs: tests
+  main-is: tests.hs
+  build-depends: base
+               , WangsAlgorithm
+               , HUnit >= 1.2.5.0
+               , QuickCheck >= 2
+  Default-Language: Haskell2010
+  ghc-options: -Wall -threaded
