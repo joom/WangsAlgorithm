@@ -1,13 +1,13 @@
 WangsAlgorithm [![Build Status](https://secure.travis-ci.org/joom/WangsAlgorithm.svg)](http://travis-ci.org/joom/WangsAlgorithm)
 ==============
 
-A propositional theorem prover in Haskell, using Wang's Algorithm. Reading [a Prolog implementation](https://github.com/benhuds/Prolog) helped me understand it better.
+A propositional theorem prover in Haskell, using [Wang's Algorithm](http://www.cs.bham.ac.uk/research/projects/poplog/doc/popteach/wang), based on the sequent calculus (LK). Reading [a Prolog implementation](https://github.com/benhuds/Prolog) helped me understand it better.
 
 ## Usage
 
 In order to use or compile the program you need to have [Haskell](http://www.haskell.org/) installed.
 
-After you cloning the repository, go the repository folder and do
+After you cloning the repository, go to the repository folder and do
 
 ```bash
 cabal build
@@ -116,6 +116,12 @@ Second branch:
 
 -------------------
 Proof completed.
+```
+
+If you want to run the tests, use this command:
+
+```bash
+cabal test
 ```
 
 ## License

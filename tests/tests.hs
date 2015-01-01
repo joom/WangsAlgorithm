@@ -22,7 +22,7 @@ example =  Sequent [ Or (Atom "a") (Atom "b"), And (Atom "a") (Atom "c"),
                      Not (Atom "b"), Implies (Atom "c") (Atom "d") ]
                    [ Atom "b", Atom "c", And (Atom "c") (Atom "d") ]
 
--- these examples should all have a complete proof
+-- | These examples should all have a complete proof.
 tautologyExamples :: [(String, String)]
 tautologyExamples =
   [ ("Modus Ponens"            , "[(p->q)&p] |- [q]")
@@ -55,12 +55,28 @@ tautologyExamples =
   , ("Law of Non-Contradiction", "[] |- [~(p&(~p))]")
   ]
 
+-- | These examples should not have a complete proof.
+unprovableExamples :: [String]
+unprovableExamples =
+    -- Contradictions
+  [ "[~p] |- [p]"
+  , "[(~p)&(~q)] |- [p,q]"
+  , "[p|q] |- [(~p)&(~q)]"
+    -- Contingencies
+    -- Conditional ones (not tautologies, so no complete proof)
+  , "[~p, p&q] |- [q]"
+  , "[(p&q)->r] |- [((p&q)->r)&(((~p)|(~q))->(~r))]"
+  ]
+
 -- HUnit tests
-tautologyTests :: [Assertion]
-tautologyTests =
+completeProofTests :: [Assertion]
+completeProofTests =
   map (\(s,t) -> assertEqual s (Just True)
                  (completeProof <$> (prove =<< maybeReadSequent t)))
       tautologyExamples
+  ++ map (\t  -> assertEqual t (Just True)
+                 ((not . completeProof) <$> (prove =<< maybeReadSequent t)))
+      unprovableExamples
 
 assertExample :: String -> Assertion
 assertExample s = assertEqual s (Just example) (maybeReadSequent s)
@@ -88,7 +104,7 @@ tests = TestList $ map TestCase $
   , assertExample "[(a)∨(b),(a)∧(c),¬(b),(c)⊃(d)]⊢[b,c,(c)∧(d)]"
     -- fancy characters with spaces
   , assertExample "[(a) ∨ (b),(a) ∧ (c),¬(b),(c) ⊃ (d)] ⊢ [b,c,(c) ∧ (d)]"
-  ] ++ tautologyTests
+  ] ++ completeProofTests
 
 -- QuickCheck tests
 
@@ -102,7 +118,7 @@ instance Arbitrary Proposition where
                     , liftM2 Implies arbitrary (return (Atom "x"))
                     , liftM2 And     (return (Atom "y")) arbitrary
                     , liftM2 Or      (return (Atom "y")) arbitrary
-                    , liftM2 Implies (return (Atom "y")) arbitrary  ]
+                    , liftM2 Implies (return (Atom "y")) arbitrary ]
 
 instance Arbitrary Sequent where
   arbitrary = liftM2 Sequent arbitrary arbitrary

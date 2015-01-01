@@ -62,12 +62,10 @@ prove sequent@(Sequent lefts rights)
       let new = (leftsWithoutAnd ++ concatMap (toList . andProp) leftsWithAnd)
                 `proves` rights
       in Just $ Linear (ProofStep AndLeft sequent) (prove new)
-
   | any isOr rights =
       let new = lefts `proves`
                 (rightsWithoutOr ++ concatMap (toList . orProp) rightsWithOr)
       in Just $ Linear (ProofStep OrRight sequent) (prove new)
-
   | any isImp rights =
       let new = (lefts ++ map (fst . impProp) rightsWithImp) `proves`
                 (rightsWithoutImp ++ map (snd . impProp) rightsWithImp)
@@ -91,7 +89,6 @@ prove sequent@(Sequent lefts rights)
       let new2 = lefts `proves` (p2 : filter (/= x) rights) in
       Just $ Branch (ProofStep AndRight sequent)
                     (prove new1) (prove new2)
-
   | any isImp lefts   =
       let (x:_)    = leftsWithImp in
       let (p1, p2) = impProp x    in
@@ -141,13 +138,11 @@ instance Show Proof where
 
 -- | Returns True if all branches end with Id.
 completeProof :: Proof -> Bool
-completeProof (Linear (ProofStep r _) n) =
-    r == Id || rest
+completeProof (Linear (ProofStep r _) n) = r == Id || rest
   where rest = case n of
                  Just x -> completeProof x
                  _      -> False
-completeProof (Branch (ProofStep _ _) p1 p2) =
-    rest p1 && rest p2
+completeProof (Branch (ProofStep _ _) p1 p2) = rest p1 && rest p2
   where rest p = case p of
                    Just x -> completeProof x
                    _      -> False
