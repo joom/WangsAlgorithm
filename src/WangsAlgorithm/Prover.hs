@@ -1,10 +1,11 @@
 module WangsAlgorithm.Prover where
 
-import Data.List (partition)
+import Data.List (partition, intersect, delete, (\\))
 import WangsAlgorithm.Proposition
 
 data Rule = Id
-          | IdStar
+          | WeakeningLeft
+          | WeakeningRight
           | NotLeft
           | NotRight
           | AndLeft
@@ -35,9 +36,15 @@ prove sequent@(Sequent lefts rights)
   | lefts == rights =
       Just $ Linear (ProofStep Id sequent) Nothing
 
-  -- TODO: replace IdStar with cut/weakening rules
-  | any (`elem` rights) lefts =
-      Just $ Linear (ProofStep IdStar sequent) Nothing
+  -- Weakening rules
+  | all (not . null) [lefts \\ rights, intersection] =
+      let (x:_) = lefts \\ rights in
+      let new = delete x lefts `proves` rights in
+      Just $ Linear (ProofStep WeakeningLeft sequent) (prove new)
+  | all (not . null) [rights \\ lefts, intersection] =
+      let (x:_) = rights \\ lefts in
+      let new = lefts `proves` delete x rights in
+      Just $ Linear (ProofStep WeakeningRight sequent) (prove new)
 
   -- If one of the formulae separated by commas is the negation of a
   -- formula, drop the negation sign and move it to the other side of the
@@ -103,7 +110,7 @@ prove sequent@(Sequent lefts rights)
             (rightsWithOr,  rightsWithoutOr)  = partition isOr  rights
             (rightsWithImp, rightsWithoutImp) = partition isImp rights
             toList (x, y) = [x, y]
-
+            intersection = lefts `intersect` rights
 
 -- | Adds 4 spaces in front of every line in the string.
 tab :: String -> String
@@ -132,10 +139,10 @@ instance Show Proof where
                     Just proof -> show proof
                     _          -> "End."
 
--- | Returns True if all branches end with Id or IdStar.
+-- | Returns True if all branches end with Id.
 completeProof :: Proof -> Bool
 completeProof (Linear (ProofStep r _) n) =
-    r `elem` [Id,IdStar] || rest
+    r == Id || rest
   where rest = case n of
                  Just x -> completeProof x
                  _      -> False

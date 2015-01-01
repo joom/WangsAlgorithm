@@ -93,6 +93,8 @@ tests = TestList $ map TestCase $
 -- QuickCheck tests
 
 instance Arbitrary Proposition where
+  -- Forcing one arbitrary per connective to have smaller
+  -- propositions that are easier to test.
   arbitrary = oneof [ liftM  Atom    (elements $ map (:[]) ['a'..'z'])
                     , liftM  Not     arbitrary
                     , liftM2 And     arbitrary (return (Atom "x"))
@@ -109,7 +111,7 @@ instance Arbitrary Sequent where
 parseable :: Sequent -> Bool
 parseable = isJust . maybeReadSequent . show
 
--- TODO: more QuickCheck tests, I couldn't think of any other
+-- TODO: more QuickCheck tests, I couldn't think of any other properties.
 
 -- General
 

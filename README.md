@@ -24,28 +24,40 @@ Then you can enter propositions to see the proofs of them. Here's an example pro
 ```
 ?: [(p->q)&(p->r)] |- [p->(q&r)]
 Before: [((p) ⊃ (q)) ∧ ((p) ⊃ (r))] ⊢ [(p) ⊃ ((q) ∧ (r))]
-Rule: AndLeft
+Rule:   AndLeft
 -------------------
 Before: [(p) ⊃ (q),(p) ⊃ (r)] ⊢ [(p) ⊃ ((q) ∧ (r))]
-Rule: ImpliesRight
+Rule:   ImpliesRight
 -------------------
 Before: [(p) ⊃ (q),(p) ⊃ (r),p] ⊢ [(q) ∧ (r)]
-Rule: AndRight
+Rule:   AndRight
 -------------------
 First branch:
     Before: [(p) ⊃ (q),(p) ⊃ (r),p] ⊢ [q]
-    Rule: ImpliesLeft
+    Rule:   ImpliesLeft
     -------------------
     First branch:
         Before: [(p) ⊃ (r),p] ⊢ [p,q]
-        Rule: IdStar
+        Rule:   WeakeningLeft
+        -------------------
+        Before: [p] ⊢ [p,q]
+        Rule:   WeakeningRight
+        -------------------
+        Before: [p] ⊢ [p]
+        Rule:   Id
         -------------------
         End.
 
     -------------------
     Second branch:
         Before: [q,(p) ⊃ (r),p] ⊢ [q]
-        Rule: IdStar
+        Rule:   WeakeningLeft
+        -------------------
+        Before: [q,p] ⊢ [q]
+        Rule:   WeakeningLeft
+        -------------------
+        Before: [q] ⊢ [q]
+        Rule:   Id
         -------------------
         End.
 
@@ -54,29 +66,47 @@ First branch:
 -------------------
 Second branch:
     Before: [(p) ⊃ (q),(p) ⊃ (r),p] ⊢ [r]
-    Rule: ImpliesLeft
+    Rule:   ImpliesLeft
     -------------------
     First branch:
         Before: [(p) ⊃ (r),p] ⊢ [p,r]
-        Rule: IdStar
+        Rule:   WeakeningLeft
+        -------------------
+        Before: [p] ⊢ [p,r]
+        Rule:   WeakeningRight
+        -------------------
+        Before: [p] ⊢ [p]
+        Rule:   Id
         -------------------
         End.
 
     -------------------
     Second branch:
         Before: [q,(p) ⊃ (r),p] ⊢ [r]
-        Rule: ImpliesLeft
+        Rule:   ImpliesLeft
         -------------------
         First branch:
             Before: [q,p] ⊢ [p,r]
-            Rule: IdStar
+            Rule:   WeakeningLeft
+            -------------------
+            Before: [p] ⊢ [p,r]
+            Rule:   WeakeningRight
+            -------------------
+            Before: [p] ⊢ [p]
+            Rule:   Id
             -------------------
             End.
 
         -------------------
         Second branch:
             Before: [r,q,p] ⊢ [r]
-            Rule: IdStar
+            Rule:   WeakeningLeft
+            -------------------
+            Before: [r,p] ⊢ [r]
+            Rule:   WeakeningLeft
+            -------------------
+            Before: [r] ⊢ [r]
+            Rule:   Id
             -------------------
             End.
 
