@@ -1,3 +1,4 @@
+{-# OPTIONS_GHC -fno-warn-orphans #-}
 module Main where
 
 import WangsAlgorithm.Parser
@@ -24,33 +25,33 @@ example =  Sequent [ Or (Atom "a") (Atom "b"), And (Atom "a") (Atom "c"),
 -- these examples should all have a complete proof
 tautologyExamples :: [(String, String)]
 tautologyExamples =
-  [ ("Modus Ponens", "[(p->q)&p] |- [q]")
-  , ("Modus Tollens", "[(p->q)&(~q)] |- [~p]")
-  , ("Hypothetical Syllogism", "[((p->q)&(q->r))] |- [p->r]")
-  , ("Disjunctive Syllogism", "[(p|q)&(~p)] |- [q]")
-  , ("Constructive Dilemma", "[(p->q)&(r->s)&(p|r)] |- [q|s]")
-  , ("Destructive Dilemma", "[(p->q)&(r->s)&((~q)|(~s))] |- [(~p)|(~r)]")
-  , ("Bidirectional Dilemma", "[(p->q)&(r->s)&(p|(~s))] |- [q|(~r)]")
-  , ("Simplification", "[p&q] |- [p]")
-  , ("Conjunction", "[p,q] |- [p&q]")
-  , ("Addition", "[p] |- [p|q]")
-  , ("Composition", "[(p->q)&(p->r)] |- [p->(q&r)]")
-  , ("De Morgan's Theorem (1)", "[~(p&q)] |- [(~p)|(~q)]")
-  , ("De Morgan's Theorem (2)", "[~(p|q)] |- [(~p)&(~q)]")
-  , ("Commutation (1)", "[p|q] |- [q|p]")
-  , ("Commutation (2)", "[p&q] |- [q&p]")
-  , ("Association (1)", "[p|(q|r)] |- [(p|q)|r]")
-  , ("Association (2)", "[p&(q&r)] |- [(p&q)&r]")
-  , ("Distribution (1)", "[p&(q|r)] |- [(p&q)|(p&r)]")
-  , ("Distribution (2)", "[p|(q&r)] |- [(p|q)&(p|r)]")
-  , ("Double Negation", "[p] |- [~(~p)]")
-  , ("Transposition", "[p->q] |- [(~q)->(~p)]")
-  , ("Material Implication", "[p->q] |- [(~p)|q]")
-  , ("Exportation", "[(p&q)->r] |- [p->(q->r)]")
-  , ("Importation", "[p->(q->r)] |- [(p&q)->r]")
-  , ("Tautology (1)", "[p] |- [p|p]")
-  , ("Tautology (2)", "[p] |- [p&p]")
-  , ("Law of Excluded Middle", "[] |- [p|(~p)]")
+  [ ("Modus Ponens"            , "[(p->q)&p] |- [q]")
+  , ("Modus Tollens"           , "[(p->q)&(~q)] |- [~p]")
+  , ("Hypothetical Syllogism"  , "[((p->q)&(q->r))] |- [p->r]")
+  , ("Disjunctive Syllogism"   , "[(p|q)&(~p)] |- [q]")
+  , ("Constructive Dilemma"    , "[(p->q)&(r->s)&(p|r)] |- [q|s]")
+  , ("Destructive Dilemma"     , "[(p->q)&(r->s)&((~q)|(~s))] |- [(~p)|(~r)]")
+  , ("Bidirectional Dilemma"   , "[(p->q)&(r->s)&(p|(~s))] |- [q|(~r)]")
+  , ("Simplification"          , "[p&q] |- [p]")
+  , ("Conjunction"             , "[p,q] |- [p&q]")
+  , ("Addition"                , "[p] |- [p|q]")
+  , ("Composition"             , "[(p->q)&(p->r)] |- [p->(q&r)]")
+  , ("De Morgan's Theorem (1)" , "[~(p&q)] |- [(~p)|(~q)]")
+  , ("De Morgan's Theorem (2)" , "[~(p|q)] |- [(~p)&(~q)]")
+  , ("Commutation (1)"         , "[p|q] |- [q|p]")
+  , ("Commutation (2)"         , "[p&q] |- [q&p]")
+  , ("Association (1)"         , "[p|(q|r)] |- [(p|q)|r]")
+  , ("Association (2)"         , "[p&(q&r)] |- [(p&q)&r]")
+  , ("Distribution (1)"        , "[p&(q|r)] |- [(p&q)|(p&r)]")
+  , ("Distribution (2)"        , "[p|(q&r)] |- [(p|q)&(p|r)]")
+  , ("Double Negation"         , "[p] |- [~(~p)]")
+  , ("Transposition"           , "[p->q] |- [(~q)->(~p)]")
+  , ("Material Implication"    , "[p->q] |- [(~p)|q]")
+  , ("Exportation"             , "[(p&q)->r] |- [p->(q->r)]")
+  , ("Importation"             , "[p->(q->r)] |- [(p&q)->r]")
+  , ("Tautology (1)"           , "[p] |- [p|p]")
+  , ("Tautology (2)"           , "[p] |- [p&p]")
+  , ("Law of Excluded Middle"  , "[] |- [p|(~p)]")
   , ("Law of Non-Contradiction", "[] |- [~(p&(~p))]")
   ]
 
@@ -58,7 +59,7 @@ tautologyExamples =
 tautologyTests :: [Assertion]
 tautologyTests =
   map (\(s,t) -> assertEqual s (Just True)
-                 (completeProof <$> (solver =<< maybeReadSequent t)))
+                 (completeProof <$> (prove =<< maybeReadSequent t)))
       tautologyExamples
 
 assertExample :: String -> Assertion
@@ -67,7 +68,8 @@ assertExample s = assertEqual s (Just example) (maybeReadSequent s)
 tests :: Test
 tests = TestList $ map TestCase $
   [
-    -- mostly parsing tests
+  -- Simple parser tests
+
     -- empty list
     assertEqual "[] |- []" (Just $ Sequent [] []) (maybeReadSequent "[] |- []")
     -- singleton
@@ -91,26 +93,30 @@ tests = TestList $ map TestCase $
 -- QuickCheck tests
 
 instance Arbitrary Proposition where
-  arbitrary = oneof [ liftM  Atom    arbitrary
+  arbitrary = oneof [ liftM  Atom    (elements $ map (:[]) ['a'..'z'])
                     , liftM  Not     arbitrary
-                    , liftM2 And     arbitrary arbitrary
-                    , liftM2 Or      arbitrary arbitrary
-                    , liftM2 Implies arbitrary arbitrary ]
+                    , liftM2 And     arbitrary (return (Atom "x"))
+                    , liftM2 Or      arbitrary (return (Atom "x"))
+                    , liftM2 Implies arbitrary (return (Atom "x"))
+                    , liftM2 And     (return (Atom "y")) arbitrary
+                    , liftM2 Or      (return (Atom "y")) arbitrary
+                    , liftM2 Implies (return (Atom "y")) arbitrary  ]
 
 instance Arbitrary Sequent where
   arbitrary = liftM2 Sequent arbitrary arbitrary
 
+-- | It should be able to parse back the string representation of a sequent.
 parseable :: Sequent -> Bool
 parseable = isJust . maybeReadSequent . show
 
--- TODO: more QuickCheck tests
+-- TODO: more QuickCheck tests, I couldn't think of any other
 
 -- General
 
 runTests ::  IO ()
 runTests = do
   _ <- runTestTT tests
-  -- mapM_ quickCheck [parseable]
+  mapM_ quickCheck [parseable]
   return ()
 
 -- | For now, main will run our tests.

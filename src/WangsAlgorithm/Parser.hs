@@ -6,11 +6,11 @@ import Text.ParserCombinators.Parsec
 import Text.ParserCombinators.Parsec.Expr
 import Data.Char (isSpace)
 
-expr :: Parser Proposition
-expr = buildExpressionParser operators factor <?> "Proposition"
+parseProp :: Parser Proposition
+parseProp = buildExpressionParser operators factor <?> "Proposition"
   where
-    factor = do { _ <- char '(' ; x <- expr ; _ <- char ')' ; return x }
-            <|> atom
+    factor = do { _ <- char '(' ; x <- parseProp ; _ <- char ')' ; return x }
+            <|> fmap Atom (many1 letter)
             <?> "Proposition"
     operators = [ unaries  Not     ["~", "-", "¬"]
                 , binaries And     ["&", "^", "∧"]
@@ -21,28 +21,27 @@ expr = buildExpressionParser operators factor <?> "Proposition"
     unaries c = map (unary c)
     binaries c = map (binary c)
 
-atom :: Parser Proposition
-atom = do { ds <- many1 letter ; return (Atom ds)} <?> "Atom"
-
-props :: Parser [Proposition]
-props = do {
-    first <- expr
-  ; next <- (char ',' >> props) <|> return []
+-- | Parses prop list without the brackets.
+parseProps :: Parser [Proposition]
+parseProps = do {
+    first <- parseProp
+  ; next <- (char ',' >> parseProps) <|> return []
   ; return (first : next) } <|> return []
 
-propList :: Parser [Proposition]
-propList = do
+-- | Parses prop list with the brackets.
+parsePropList :: Parser [Proposition]
+parsePropList = do
     _ <- char '['
-    l <- props
+    l <- parseProps
     _ <- char ']'
     return l
 
-sequent :: Parser Sequent
-sequent  = do
-  lefts <- propList
+parseSequent :: Parser Sequent
+parseSequent  = do
+  lefts <- parsePropList
   _ <- (char '|' >> char '-') <|> char '⊢'
-  rights <- propList
+  rights <- parsePropList
   return $ lefts `proves` rights
 
 readSequent :: String -> Either ParseError Sequent
-readSequent s = parse sequent "Sequent" (filter (not . isSpace) s)
+readSequent s = parse parseSequent "Sequent" (filter (not . isSpace) s)

@@ -26,8 +26,16 @@ data Proof = Linear { step   :: ProofStep
                     , second :: Maybe Proof
                     } deriving Eq
 
-solver :: Sequent -> Maybe Proof
-solver sequent@(Sequent lefts rights)
+-- | Returns the taken proof steps.
+-- It doesn't have to be a complete proof.
+-- Even if it doesn't succeed to finish the proof,
+-- it is going to return the proof steps taken.
+prove :: Sequent -> Maybe Proof
+prove sequent@(Sequent lefts rights)
+  | lefts == rights =
+      Just $ Linear (ProofStep Id sequent) Nothing
+
+  -- TODO: replace IdStar with cut/weakening rules
   | any (`elem` rights) lefts =
       Just $ Linear (ProofStep IdStar sequent) Nothing
 
@@ -36,27 +44,27 @@ solver sequent@(Sequent lefts rights)
   -- arrow.
   | any isNot lefts =
       let new = leftsWithoutNot `proves` (rights ++ map notProp leftsWithNot)
-      in Just $ Linear (ProofStep NotLeft sequent) (solver new)
+      in Just $ Linear (ProofStep NotLeft sequent) (prove new)
   | any isNot rights =
       let new = (lefts ++ map notProp rightsWithNot) `proves` rightsWithoutNot
-      in Just $ Linear (ProofStep NotRight sequent) (solver new)
+      in Just $ Linear (ProofStep NotRight sequent) (prove new)
 
   -- If the principal connective of a formula on the left is ^ (and), or on
   -- the right of the arrow is v (or), replace the connective by a comma.
   | any isAnd lefts =
       let new = (leftsWithoutAnd ++ concatMap (toList . andProp) leftsWithAnd)
                 `proves` rights
-      in Just $ Linear (ProofStep AndLeft sequent) (solver new)
+      in Just $ Linear (ProofStep AndLeft sequent) (prove new)
 
   | any isOr rights =
       let new = lefts `proves`
                 (rightsWithoutOr ++ concatMap (toList . orProp) rightsWithOr)
-      in Just $ Linear (ProofStep OrRight sequent) (solver new)
+      in Just $ Linear (ProofStep OrRight sequent) (prove new)
 
   | any isImp rights =
       let new = (lefts ++ map (fst . impProp) rightsWithImp) `proves`
                 (rightsWithoutImp ++ map (snd . impProp) rightsWithImp)
-      in Just $ Linear (ProofStep ImpliesRight sequent) (solver new)
+      in Just $ Linear (ProofStep ImpliesRight sequent) (prove new)
 
   -- If the principal connective of a formula on the left is v (or), or on
   -- the right of the arrow is ^ (and), then produce two new lines, each
@@ -68,14 +76,14 @@ solver sequent@(Sequent lefts rights)
       let new1 = (p1 : filter (/= x) lefts) `proves` rights in
       let new2 = (p2 : filter (/= x) lefts) `proves` rights in
       Just $ Branch (ProofStep OrLeft sequent)
-                    (solver new1) (solver new2)
+                    (prove new1) (prove new2)
   | any isAnd rights   =
       let (x:_)    = rightsWithAnd in
       let (p1, p2) = andProp x     in
       let new1 = lefts `proves` (p1 : filter (/= x) rights) in
       let new2 = lefts `proves` (p2 : filter (/= x) rights) in
       Just $ Branch (ProofStep AndRight sequent)
-                    (solver new1) (solver new2)
+                    (prove new1) (prove new2)
 
   | any isImp lefts   =
       let (x:_)    = leftsWithImp in
@@ -83,26 +91,28 @@ solver sequent@(Sequent lefts rights)
       let new1 = filter (/= x) lefts `proves` (p1 : rights) in
       let new2 = (p2 : filter (/= x) lefts) `proves` rights in
       Just $ Branch (ProofStep ImpliesLeft sequent)
-                    (solver new1) (solver new2)
+                    (prove new1) (prove new2)
 
-  | otherwise       = Nothing
+  | otherwise = Nothing
       where (leftsWithNot,  leftsWithoutNot)  = partition isNot lefts
             (leftsWithAnd,  leftsWithoutAnd)  = partition isAnd lefts
             (leftsWithOr,   _)                = partition isOr  lefts
             (leftsWithImp,  _)                = partition isImp lefts
-
             (rightsWithNot, rightsWithoutNot) = partition isNot rights
             (rightsWithAnd, _)                = partition isAnd rights
             (rightsWithOr,  rightsWithoutOr)  = partition isOr  rights
             (rightsWithImp, rightsWithoutImp) = partition isImp rights
+            toList (x, y) = [x, y]
 
+
+-- | Adds 4 spaces in front of every line in the string.
 tab :: String -> String
 tab = unlines . map ("    "++) . lines
 
 instance Show Proof where
   show (Linear (ProofStep r bf) n) = init $ unlines [
       "Before: " ++ show bf,
-      "Rule: "   ++ show r,
+      "Rule:   " ++ show r,
       "-------------------",
       rest ]
     where rest = case n of
@@ -110,7 +120,7 @@ instance Show Proof where
                    _          -> "End."
   show (Branch (ProofStep r bf) p1 p2) = init $ unlines [
       "Before: " ++ show bf,
-      "Rule: "   ++ show r,
+      "Rule:   " ++ show r,
       "-------------------",
       "First branch: ",
       tab (rest p1),
@@ -122,6 +132,7 @@ instance Show Proof where
                     Just proof -> show proof
                     _          -> "End."
 
+-- | Returns True if all branches end with Id or IdStar.
 completeProof :: Proof -> Bool
 completeProof (Linear (ProofStep r _) n) =
     r `elem` [Id,IdStar] || rest

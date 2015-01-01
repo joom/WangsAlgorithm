@@ -10,7 +10,7 @@ data Proposition = Atom   {name :: String}
 data Sequent = Sequent [Proposition] [Proposition]
                deriving Eq
 
--- a more readable infix alias for Sequent
+-- | A more readable infix alias for Sequent.
 proves :: [Proposition] -> [Proposition] -> Sequent
 proves = Sequent
 
@@ -23,9 +23,6 @@ instance Show Proposition where
 
 instance Show Sequent where
   show (Sequent x y) = show x ++ " ⊢ " ++ show y
-
-toList :: (a,a) -> [a]
-toList (x, y) = [x, y]
 
 notProp :: Proposition -> Proposition
 notProp (Not x) = x

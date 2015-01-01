@@ -1,7 +1,7 @@
 WangsAlgorithm [![Build Status](https://secure.travis-ci.org/joom/WangsAlgorithm.svg)](http://travis-ci.org/joom/WangsAlgorithm)
 ==============
 
-A propositional theorem prover in Haskell, using Wang's Algorithm.
+A propositional theorem prover in Haskell, using Wang's Algorithm. Reading [a Prolog implementation](https://github.com/benhuds/Prolog) helped me understand it better.
 
 ## Usage
 

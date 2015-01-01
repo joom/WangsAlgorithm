@@ -19,7 +19,7 @@ replStart = do
   sequent <- getSequent
   case sequent of
     Left err -> putStrLn "Cannot be parsed: " >> print err
-    Right sq -> case solver sq of
+    Right sq -> case prove sq of
                   Just proof -> do print proof
                                    putStrLn $ if completeProof proof
                                               then "Proof completed.\n"

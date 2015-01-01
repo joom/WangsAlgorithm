@@ -1,16 +1,13 @@
 name:                WangsAlgorithm
 version:             0.1.0.0
 synopsis:            A Propositional Theorem Prover using Wang's Algorithm
--- description:
 homepage:            http://github.com/joom/WangsAlgorithm
 license:             MIT
 license-file:        LICENSE
 author:              Joomy Korkut
 maintainer:          cumhurkorkut@gmail.com
--- copyright:
 category:            Math
 build-type:          Simple
--- extra-source-files:
 cabal-version:       >=1.10
 
 executable wang
