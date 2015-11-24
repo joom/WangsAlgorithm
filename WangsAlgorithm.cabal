@@ -12,9 +12,18 @@ cabal-version:       >=1.10
 
 executable wang
   main-is:             Main.hs
-  build-depends:       base >=4.7 && <4.8
+  build-depends:       base >=4.7
                      , parsec >= 3
                      , WangsAlgorithm
+  hs-source-dirs:      execs
+  default-language:    Haskell2010
+
+executable latex
+  main-is:             LaTeX.hs
+  build-depends:       base >=4.7
+                     , parsec >= 3
+                     , WangsAlgorithm
+                     , HaTeX
   hs-source-dirs:      execs
   default-language:    Haskell2010
 
@@ -23,8 +32,10 @@ library
   exposed-modules:     WangsAlgorithm.Proposition
                      , WangsAlgorithm.Prover
                      , WangsAlgorithm.Parser
+                     , WangsAlgorithm.LaTeX
   build-depends:       base
                      , parsec >= 3
+                     , HaTeX >= 3
   hs-source-dirs:      src
   default-language:    Haskell2010
   ghc-options: -Wall -threaded
