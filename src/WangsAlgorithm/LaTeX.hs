@@ -9,6 +9,7 @@ import Data.Maybe
 import Text.LaTeX
 import Text.LaTeX.Base.Class
 import Text.LaTeX.Base.Syntax
+import Text.LaTeX.Base.Pretty
 import Text.LaTeX.Packages.AMSMath
 
 ruleName :: Rule -> LaTeX
@@ -51,3 +52,6 @@ proof (Branch (ProofStep r bf) p1 p2) =
 
 entireProof :: Proof -> LaTeX
 entireProof = TeXEnv "prooftree" [] . proof
+
+latexProof :: Proof -> String
+latexProof = prettyLaTeX . entireProof

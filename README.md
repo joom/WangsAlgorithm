@@ -5,24 +5,31 @@ A propositional theorem prover in Haskell, using [Wang's Algorithm](http://www.c
 
 ## Usage
 
-In order to use or compile the program you need to have [Haskell](http://www.haskell.org/) installed.
+In order to use or compile the program you need to have [Stack](http://haskellstack.org) installed.
 
 After you cloning the repository, go to the repository folder and do
 
 ```bash
-cabal build
+stack install
 ```
 
-Now you compiled the program. You can run it like this:
+Now you installed the program. You can run it like this:
 
 ```bash
-./dist/build/wang/wang
+wang --sequent "[(p->q)&(p->r)] |- [p->(q&r)]" --backend Text
 ```
 
-Then you can enter propositions to see the proofs of them. Here's an example proof:
+Or shortly:
+
+```bash
+wang -s "[(p->q)&(p->r)] |- [p->(q&r)]" -b Text
+```
+
+You can also use `LaTeX` for an output.
+
+Here's an example text proof for that:
 
 ```
-?: [(p->q)&(p->r)] |- [p->(q&r)]
 Before: [((p) ⊃ (q)) ∧ ((p) ⊃ (r))] ⊢ [(p) ⊃ ((q) ∧ (r))]
 Rule:   AndLeft
 -------------------
@@ -118,10 +125,56 @@ Second branch:
 Proof completed.
 ```
 
+Here's the LaTeX output for the same sequent.
+
+```
+\begin{prooftree}
+    \AxiomC{} \RightLabel{\scriptsize $I$}
+    \UnaryInfC{$p\vdash p$} \RightLabel{\scriptsize $WR$}
+    \UnaryInfC{$p\vdash p,q$} \RightLabel{\scriptsize $WL$}
+    \UnaryInfC{$\left( p\supset r\right) ,p\vdash p,q$}
+    \AxiomC{} \RightLabel{\scriptsize $I$}
+    \UnaryInfC{$q\vdash q$} \RightLabel{\scriptsize $WL$}
+    \UnaryInfC{$q,p\vdash q$} \RightLabel{\scriptsize $WL$}
+    \UnaryInfC{$q,\left( p\supset r\right) ,p\vdash q$}
+    \RightLabel{\scriptsize $\supset L$}
+    \BinaryInfC{$\left( p\supset q\right) ,\left( p\supset
+               r\right) ,p\vdash q$} \AxiomC{}
+    \RightLabel{\scriptsize $I$} \UnaryInfC{$p\vdash p$}
+    \RightLabel{\scriptsize $WR$} \UnaryInfC{$p\vdash p,r$}
+    \RightLabel{\scriptsize $WL$}
+    \UnaryInfC{$\left( p\supset r\right) ,p\vdash p,r$}
+    \AxiomC{} \RightLabel{\scriptsize $I$}
+    \UnaryInfC{$p\vdash p$} \RightLabel{\scriptsize $WR$}
+    \UnaryInfC{$p\vdash p,r$} \RightLabel{\scriptsize $WL$}
+    \UnaryInfC{$q,p\vdash p,r$} \AxiomC{}
+    \RightLabel{\scriptsize $I$} \UnaryInfC{$r\vdash r$}
+    \RightLabel{\scriptsize $WL$} \UnaryInfC{$r,p\vdash r$}
+    \RightLabel{\scriptsize $WL$}
+    \UnaryInfC{$r,q,p\vdash r$}
+    \RightLabel{\scriptsize $\supset L$}
+    \BinaryInfC{$q,\left( p\supset r\right) ,p\vdash r$}
+    \RightLabel{\scriptsize $\supset L$}
+    \BinaryInfC{$\left( p\supset q\right) ,\left( p\supset
+               r\right) ,p\vdash r$}
+    \RightLabel{\scriptsize $\wedge R$}
+    \BinaryInfC{$\left( p\supset q\right) ,\left( p\supset
+               r\right) ,p\vdash \left( q\wedge r\right) $}
+    \RightLabel{\scriptsize $\supset R$}
+    \UnaryInfC{$\left( p\supset q\right) ,\left( p\supset
+              r\right) \vdash \left( p\supset \left( q\wedge
+              r\right) \right) $}
+    \RightLabel{\scriptsize $\wedge L$}
+    \UnaryInfC{$\left( \left( p\supset q\right) \wedge
+              \left( p\supset r\right) \right) \vdash \left(
+              p\supset \left( q\wedge r\right) \right) $}
+\end{prooftree}
+```
+
 If you want to run the tests, use this command:
 
 ```bash
-cabal test
+stack test
 ```
 
 ## License

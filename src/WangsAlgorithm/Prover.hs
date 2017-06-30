@@ -146,3 +146,9 @@ completeProof (Branch (ProofStep _ _) p1 p2) = rest p1 && rest p2
   where rest p = case p of
                    Just x -> completeProof x
                    _      -> False
+
+showProof :: Proof -> String
+showProof pf = show pf ++ "\n" ++
+    if completeProof pf
+    then "Proof completed."
+    else "This cannot be proved."
