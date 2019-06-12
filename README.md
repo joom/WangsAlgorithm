@@ -177,6 +177,11 @@ If you want to run the tests, use this command:
 stack test
 ```
 
+# Further Reading
+
+* Hao Wang, 1960, "Toward Mechanical Mathematics"
+* John McCarthy, 1961, "LISP 1.5 Programmer's Manual"
+
 ## License
 
 The MIT License (MIT)
